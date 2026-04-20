@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.venv/
+cookies.json
+markdown/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
