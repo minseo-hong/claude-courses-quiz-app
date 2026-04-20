@@ -101,7 +101,7 @@ export default function App() {
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
 
       {/* ── 모바일 상단 바 ── */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card border-b border-stroke flex items-center gap-3 px-4">
