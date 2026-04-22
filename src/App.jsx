@@ -65,11 +65,14 @@ export default function App() {
           <CloseIcon />
         </button>
       </div>
-      <nav className="flex flex-col p-3 flex-1 gap-4 overflow-y-auto">
-        {grouped.map((sec) => (
-          <div key={sec.title || 'root'}>
+      <nav className="flex flex-col p-3 flex-1 overflow-y-auto">
+        {grouped.map((sec, secIdx) => (
+          <div
+            key={sec.title || 'root'}
+            className={secIdx > 0 ? "mt-5 pt-4 border-t border-stroke" : ""}
+          >
             {sec.title && (
-              <p className="px-3 mb-1 text-[10px] font-bold tracking-widest uppercase text-ink-3">
+              <p className="px-3 mb-2 text-[13px] font-bold text-ink leading-tight">
                 {sec.title}
               </p>
             )}
