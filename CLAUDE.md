@@ -154,17 +154,18 @@ export default {
 ## 사이드바 섹션 관리 (`src/data/sections.js`)
 
 코스별 섹션 그룹과 각 섹션에 속하는 퀴즈 파일의 `lesson` 식별자를 정의한다.
-**섹션 타이틀은 해당 코스 이름을 사용한다** (예: `'Claude 101'`, `'Claude Code'`).
+**레슨별 퀴즈 섹션은 Skilljar 강의 사이드바의 원본 섹션 헤더(H3)를 그대로 타이틀로 사용한다** (예: `'Meet Claude'`, `'Organizing your work and knowledge'`).
+기출 모의고사는 별도 섹션으로 분리하며, 타이틀은 한국어 `'기출 모의고사'`를 사용한다.
 퀴즈 데이터 파일이 있어도 `sections.js`에 등록되지 않으면 사이드바에 표시되지 않는다.
+
+원본 섹션 구조는 `get_sidebar_structure.py`로 재추출해 반영한다.
 
 ```js
 export default [
-  {
-    title: 'Claude 101',
-    lessons: ['r1', 'r2', 'r3', 'r4', 'r5'],
-  },
-  // 다른 코스 추가 시:
-  // { title: 'Claude Code', lessons: [...] },
+  { title: 'Meet Claude', lessons: ['01', '02', '03', '04'] },
+  { title: 'Organizing your work and knowledge', lessons: ['05', '06', '07'] },
+  { title: '기출 모의고사', lessons: ['r1', 'r2', 'r3', 'r4', 'r5'] },
+  // 다른 코스 추가 시에도 동일 패턴 — 해당 코스 Skilljar 섹션 헤더를 타이틀로 사용
 ]
 ```
 
