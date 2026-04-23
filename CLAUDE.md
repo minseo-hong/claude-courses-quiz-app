@@ -12,7 +12,7 @@ Anthropic의 [Claude Academy](https://anthropic.skilljar.com) 강의 본문을 U
 - **TypeScript** (`strict`)
 - **Tailwind CSS v4** (`@tailwindcss/postcss` 플러그인)
 - **pnpm** (패키지 매니저)
-- `react-markdown` + `remark-gfm` (번역 마크다운 렌더링)
+- `react-markdown` + `remark-gfm` + `remark-cjk-friendly` (번역 마크다운 렌더링; CJK 경계에서도 `**굵게**`가 정상 닫힘)
 - `lucide-react` (아이콘)
 - Python + [Playwright](https://playwright.dev/python/) — Skilljar 원문 스크래핑
 
@@ -201,6 +201,7 @@ Skilljar 사이드바의 섹션 헤더(H3)와 레슨 링크를 JSON으로 출력
 
 - 파일명 = 해당 퀴즈의 slug와 동일 (title로 자동 생성되는 값과 일치해야 함)
 - 내용은 **GitHub Flavored Markdown**으로 작성 — 테이블·체크리스트·취소선·자동 링크 등 지원 (`remark-gfm`)
+- **CJK 경계 보정**: `remark-cjk-friendly` 플러그인이 CommonMark의 right-flanking 규칙을 한·중·일 문자에 친화적으로 완화한다. 덕분에 `**인텔리전스(intelligence)**입니다` 처럼 `**` 바로 앞이 구두점이고 뒤가 한글 조사인 경우도 정상적으로 닫힌다 (플러그인 없이는 CommonMark 스펙상 `**`가 종료되지 않아 본문에 `**`가 그대로 노출됨).
 - `src/lib/content.ts`가 `fs.readdirSync` / `fs.readFileSync`로 파일을 동적으로 로드 → 서버 빌드 시점에 `generateStaticParams()`가 slug 목록을 긁어가 SSG 페이지를 만든다 → 앱 재빌드 자동
 - 렌더링은 `MarkdownContent` 컴포넌트가 담당하며, `react-markdown`에 디자인 토큰(`text-ink`, `text-ink-2`, `bg-tint`, `border-stroke` 등) 기반의 커스텀 컴포넌트 매핑을 주입한다 (`markdownComponents.tsx`).
 - 콘텐츠가 있는 레슨은 `/lessons/:slug/content` 경로에서 렌더되며, `QuizPage`는 `hasContent(slug)` 결과에 따라 자동으로 탭을 노출한다.
