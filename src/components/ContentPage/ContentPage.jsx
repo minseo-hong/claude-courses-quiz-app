@@ -2,14 +2,15 @@ import { Navigate, useParams } from 'react-router'
 import { contentBySlug } from '../../contents'
 import { firstSlug, lessonPath, quizBySlug } from '../../quizzes'
 import LessonTabs from '../LessonTabs'
+import MarkdownContent from '../MarkdownContent'
 
 export default function ContentPage() {
   const { slug } = useParams()
   const quiz = quizBySlug[slug]
-  const Content = contentBySlug[slug]
+  const source = contentBySlug[slug]
 
   if (!quiz) return <Navigate to={lessonPath(firstSlug)} replace />
-  if (!Content) return <Navigate to={lessonPath(slug)} replace />
+  if (!source) return <Navigate to={lessonPath(slug)} replace />
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">
@@ -24,7 +25,7 @@ export default function ContentPage() {
       </header>
       <LessonTabs />
       <div className="bg-card border border-stroke rounded-card p-6 sm:p-10">
-        <Content />
+        <MarkdownContent source={source} />
       </div>
     </div>
   )

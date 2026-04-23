@@ -29,7 +29,7 @@ claude/
     ├── App.jsx                             # createBrowserRouter 객체 기반 라우트 정의
     ├── global.css                          # Tailwind import + @theme 디자인 토큰
     ├── quizzes.js                          # 퀴즈 데이터 로더 + URL 헬퍼 (courseSlug, lessonPath 등)
-    ├── contents.js                         # 레슨 번역 콘텐츠 로더 (slug → 컴포넌트)
+    ├── contents.js                         # 레슨 번역 콘텐츠 로더 (slug → 마크다운 원문 문자열)
     ├── components/                         # 폴더 컴포넌트 구조 (각 컴포넌트 = 폴더 + index.jsx 배럴)
     │   ├── Layout/                         # 앱 셸 (사이드바 + 본문 + <Outlet />)
     │   │   ├── DrawerBackdrop/
@@ -41,6 +41,9 @@ claude/
     │   │           └── SidebarSection/
     │   │               └── SidebarNavItem/ #         단일 NavLink → 퀴즈 페이지로 이동
     │   ├── LessonTabs/                     # 강의 내용 ↔ 복습 퀴즈 탭 (두 페이지 공유)
+    │   ├── MarkdownContent/                # 마크다운 렌더러 (react-markdown + 디자인 토큰 매핑)
+    │   │   ├── MarkdownContent.jsx         #   ReactMarkdown 래퍼 (remark-gfm 활성)
+    │   │   └── markdownComponents.jsx      #   HTML 태그별 Tailwind 스타일 매핑
     │   ├── ContentPage/                    # 강의 내용 페이지 (/content 서브리소스)
     │   └── QuizPage/                       # 복습 퀴즈 페이지
     │       ├── QuizPageHeader/
@@ -56,8 +59,8 @@ claude/
     │               ├── QuizExplanation/
     │               ├── RevealButton/
     │               └── HideButton/
-    ├── content/                            # 레슨별 한국어 번역 JSX (slug.jsx → 자동 등록)
-    │   └── {slug}.jsx
+    ├── content/                            # 레슨별 한국어 번역 마크다운 (slug.md → 자동 등록)
+    │   └── {slug}.md
     └── data/
         ├── sections.js                     # 코스별 섹션 그룹 정의 (사이드바)
         └── {id}-{이름}.js                  # 퀴즈 데이터 파일 (앱에 자동 등록)
@@ -100,7 +103,7 @@ claude/
   - 경로 구조를 한 곳에 캡슐화 — 변경 시 호출부에 영향 없음
 - **주요 export**
   - `src/quizzes.js`: `grouped`(섹션별 퀴즈), `quizBySlug`, `firstSlug`
-  - `src/contents.js`: `contentBySlug` — slug 단위 콘텐츠 컴포넌트 매핑
+  - `src/contents.js`: `contentBySlug` — slug 단위 마크다운 원문 문자열 매핑
 
 ## 강의 콘텐츠 수집 (원문 추출)
 
@@ -151,13 +154,23 @@ Skilljar 사이드바의 섹션 헤더(H3)와 레슨 링크를 JSON으로 출력
 
 ## 한국어 번역 콘텐츠 추가
 
-레슨 본문을 한국어로 번역해 웹 페이지에서 읽을 수 있게 하려면 `src/content/{slug}.jsx` 파일만 추가하면 된다.
+레슨 본문을 한국어로 번역해 웹 페이지에서 읽을 수 있게 하려면 `src/content/{slug}.md` 파일만 추가하면 된다. React 라이브러리 문서(MDN·React Docs·Tailwind Docs 등)와 같은 개발 문서 스타일로 자동 렌더링된다.
 
 - 파일명 = 해당 퀴즈의 slug와 동일 (title로 자동 생성되는 값과 일치해야 함)
-- 기본 export는 React 컴포넌트 (JSX 구조 자유)
-- `contents.js`가 `import.meta.glob`으로 자동 등록 → 앱 재빌드 불필요
+- 내용은 **GitHub Flavored Markdown**으로 작성 — 테이블·체크리스트·취소선·자동 링크 등 지원 (`remark-gfm`)
+- `contents.js`가 `import.meta.glob(..., { query: '?raw' })`로 원문 문자열을 자동 등록 → 앱 재빌드 불필요
+- 렌더링은 `MarkdownContent` 컴포넌트가 담당하며, `react-markdown`에 디자인 토큰(`text-ink`, `text-ink-2`, `bg-tint`, `border-stroke` 등) 기반의 커스텀 컴포넌트 매핑을 주입한다 (`markdownComponents.jsx`).
 - 콘텐츠가 있는 레슨은 `/lessons/:slug/content` 경로에서 렌더되며, `LessonTabs`가 자동으로 탭을 노출한다.
-- 본문은 흰색 카드(`bg-card border border-stroke rounded-card`) 안에 렌더되므로 별도 배경 스타일이 필요하지 않다. 디자인 토큰(`text-ink`, `text-ink-2` 등)만 사용해 가독성을 맞춘다.
+- 본문은 흰색 카드(`bg-card border border-stroke rounded-card`) 안에 렌더된다. 별도 배경 스타일을 직접 지정할 필요가 없다.
+
+### 마크다운 작성 규칙
+
+- **본문 첫 H1은 생략**한다. 페이지 상단 헤더가 이미 레슨 제목을 출력하므로, 마크다운은 `##`부터 시작하는 것을 권장한다.
+- **콜아웃/노트 박스**는 blockquote(`>`)로 작성한다 — 오렌지 액센트 왼쪽 바 + 연한 배경으로 렌더된다.
+- **강조가 필요한 용어**는 `**굵게**`. 이탤릭(`*기울임*`)은 Claude 액센트(`accent-dim`) 색으로 강조되므로 본문 전체에 남발하지 않는다.
+- **코드 펜스에는 언어를 명시**한다 (예: ` ```json `, ` ```bash `). 언어가 없으면 인라인 코드 스타일로 폴백된다.
+- **테이블**은 GFM 문법 사용. 헤더 셀은 자동으로 `bg-tint`가 적용된다.
+- HTML 태그를 섞어 쓸 수 있지만, 가독성을 위해 가능한 한 마크다운 문법으로만 작성한다.
 
 ## 퀴즈 데이터 작성 규칙
 
@@ -286,7 +299,7 @@ npm run build     # 프로덕션 빌드 → dist/
 npm run preview   # 빌드 결과 미리보기
 ```
 
-주요 의존성: `react`, `react-dom`, `react-router`, `lucide-react`, `tailwindcss`, `@tailwindcss/vite`.
+주요 의존성: `react`, `react-dom`, `react-router`, `lucide-react`, `tailwindcss`, `@tailwindcss/vite`, `react-markdown`, `remark-gfm`.
 
 ## 배포 (Vercel)
 
