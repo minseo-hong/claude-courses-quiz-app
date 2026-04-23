@@ -10,6 +10,9 @@ import q07 from '@/data/07-working-with-skills'
 import q08 from '@/data/08-connecting-your-tools'
 import q09 from '@/data/09-enterprise-search'
 import q10 from '@/data/10-research-mode-for-deep-dives'
+import q11 from '@/data/11-claude-in-action-use-cases-by-role'
+import q12 from '@/data/12-other-ways-to-work-with-claude'
+import q13 from '@/data/13-whats-next'
 import r1 from '@/data/r1-final-exam'
 import r2 from '@/data/r2-exam-2'
 import r3 from '@/data/r3-exam-3'
@@ -56,6 +59,7 @@ function slugify(title: string): string {
 
 const quizModules = [
   q01, q02, q03, q04, q05, q06, q07, q08, q09, q10,
+  q11, q12, q13,
   r1, r2, r3, r4, r5,
 ] as unknown as QuizModule[]
 
