@@ -1,24 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useParams } from 'react-router'
 import { grouped, quizByLesson } from '../quizzes'
-
-function HamburgerIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2" y="5"  width="16" height="1.5" rx="0.75" fill="currentColor"/>
-      <rect x="2" y="9.25" width="16" height="1.5" rx="0.75" fill="currentColor"/>
-      <rect x="2" y="13.5" width="16" height="1.5" rx="0.75" fill="currentColor"/>
-    </svg>
-  )
-}
-
-function CloseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
-    </svg>
-  )
-}
 
 function MobileTopBar({ onOpenDrawer }) {
   const { lessonId } = useParams()
@@ -32,7 +15,7 @@ function MobileTopBar({ onOpenDrawer }) {
         className="shrink-0 p-1.5 -ml-1.5 rounded-lg text-ink-2 hover:bg-lift hover:text-ink transition-colors cursor-pointer"
         aria-label="메뉴 열기"
       >
-        <HamburgerIcon />
+        <Menu size={20} />
       </button>
       <div className="flex-1 min-w-0">
         <p className="text-[10px] font-bold tracking-widest uppercase text-ink-3 leading-none mb-0.5">
@@ -80,7 +63,7 @@ export default function Layout() {
             className="md:hidden p-1 -mr-1 text-ink-3 hover:text-ink cursor-pointer"
             onClick={() => setDrawerOpen(false)}
           >
-            <CloseIcon />
+            <X size={18} />
           </button>
         </div>
         <nav className="flex flex-col p-3 flex-1 overflow-y-auto">
