@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
+import ContentPage from './components/ContentPage'
 import Layout from './components/Layout'
 import QuizPage from './components/QuizPage'
 import { firstSlug, lessonPath } from './quizzes'
@@ -11,6 +12,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to={fallback} replace /> },
       { path: 'courses/:courseSlug/lessons/:slug', element: <QuizPage /> },
+      { path: 'courses/:courseSlug/lessons/:slug/content', element: <ContentPage /> },
       { path: '*', element: <Navigate to={fallback} replace /> },
     ],
   },

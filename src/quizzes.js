@@ -2,6 +2,7 @@ import SECTIONS from './data/sections'
 
 export const courseSlug = 'claude-101'
 export const lessonPath = (slug) => `/courses/${courseSlug}/lessons/${slug}`
+export const lessonContentPath = (slug) => `${lessonPath(slug)}/content`
 
 function slugify(title) {
   return title
