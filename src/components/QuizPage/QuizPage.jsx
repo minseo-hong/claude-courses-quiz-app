@@ -1,5 +1,5 @@
 import { Navigate, useParams } from 'react-router'
-import { firstLesson, quizByLesson } from '../quizzes'
+import { firstLesson, quizByLesson } from '../../quizzes'
 import QuizCard from './QuizCard'
 
 export default function QuizPage() {
