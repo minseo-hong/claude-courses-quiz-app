@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router'
+import { lessonPath } from '../../../../../../quizzes'
 
 export default function SidebarNavItem({ quiz, onSelect }) {
   return (
     <NavLink
-      to={`/lesson/${quiz.lesson}`}
+      to={lessonPath(quiz.slug)}
       onClick={onSelect}
       className={({ isActive }) =>
         `w-full text-left px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-colors duration-150

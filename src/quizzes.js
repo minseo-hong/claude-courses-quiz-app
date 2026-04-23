@@ -1,9 +1,20 @@
 import SECTIONS from './data/sections'
 
+export const courseSlug = 'claude-101'
+export const lessonPath = (slug) => `/courses/${courseSlug}/lessons/${slug}`
+
+function slugify(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/^lesson-\d+-/, '')
+}
+
 const modules = import.meta.glob('./data/*.js', { eager: true })
 const quizzes = Object.values(modules)
   .filter((m) => m.default?.lesson)
-  .map((m) => m.default)
+  .map((m) => ({ ...m.default, slug: slugify(m.default.title) }))
   .sort((a, b) => {
     const na = Number(a.lesson), nb = Number(b.lesson)
     if (isNaN(na) && isNaN(nb)) return a.lesson.localeCompare(b.lesson)
@@ -12,7 +23,8 @@ const quizzes = Object.values(modules)
     return na - nb
   })
 
-export const quizByLesson = Object.fromEntries(quizzes.map((q) => [q.lesson, q]))
+const quizByLesson = Object.fromEntries(quizzes.map((q) => [q.lesson, q]))
+export const quizBySlug = Object.fromEntries(quizzes.map((q) => [q.slug, q]))
 
 export const grouped = SECTIONS.map((sec) => ({
   ...sec,
@@ -20,4 +32,4 @@ export const grouped = SECTIONS.map((sec) => ({
 })).filter((sec) => sec.quizzes.length > 0)
 
 const flat = grouped.flatMap((sec) => sec.quizzes)
-export const firstLesson = flat[0]?.lesson
+export const firstSlug = flat[0]?.slug

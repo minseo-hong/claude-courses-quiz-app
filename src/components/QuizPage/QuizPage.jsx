@@ -1,13 +1,13 @@
 import { Navigate, useParams } from 'react-router'
-import { firstLesson, quizByLesson } from '../../quizzes'
+import { firstSlug, lessonPath, quizBySlug } from '../../quizzes'
 import QuizPageHeader from './QuizPageHeader'
 import QuizQuestionList from './QuizQuestionList'
 
 export default function QuizPage() {
-  const { lessonId } = useParams()
-  const quiz = quizByLesson[lessonId]
+  const { slug } = useParams()
+  const quiz = quizBySlug[slug]
 
-  if (!quiz) return <Navigate to={`/lesson/${firstLesson}`} replace />
+  if (!quiz) return <Navigate to={lessonPath(firstSlug)} replace />
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">

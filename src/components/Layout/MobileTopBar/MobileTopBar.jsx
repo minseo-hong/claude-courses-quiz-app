@@ -1,10 +1,10 @@
 import { Menu } from 'lucide-react'
 import { useParams } from 'react-router'
-import { quizByLesson } from '../../../quizzes'
+import { quizBySlug } from '../../../quizzes'
 
 export default function MobileTopBar({ onOpenDrawer }) {
-  const { lessonId } = useParams()
-  const quiz = quizByLesson[lessonId]
+  const { slug } = useParams()
+  const quiz = quizBySlug[slug]
   if (!quiz) return null
 
   return (
