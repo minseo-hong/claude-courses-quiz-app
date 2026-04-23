@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Navigate, Route, Routes, useParams } from "react-router";
 import QuizPage from "./components/QuizPage";
 import SECTIONS from "./data/sections";
 
@@ -22,6 +23,7 @@ const grouped = SECTIONS.map((sec) => ({
 })).filter((sec) => sec.quizzes.length > 0);
 
 const flat = grouped.flatMap((sec) => sec.quizzes);
+const firstLesson = flat[0]?.lesson;
 
 function HamburgerIcon() {
   return (
@@ -41,18 +43,48 @@ function CloseIcon() {
   );
 }
 
+function QuizRoute({ mainRef }) {
+  const { lessonId } = useParams();
+  const quiz = quizByLesson[lessonId];
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
+  }, [lessonId, mainRef]);
+
+  if (!quiz) return <Navigate to={`/lesson/${firstLesson}`} replace />;
+
+  return <QuizPage key={quiz.lesson} quiz={quiz} />;
+}
+
+function MobileTopBar({ onOpenDrawer }) {
+  const { lessonId } = useParams();
+  const quiz = quizByLesson[lessonId];
+  if (!quiz) return null;
+
+  return (
+    <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card border-b border-stroke flex items-center gap-3 px-4">
+      <button
+        onClick={onOpenDrawer}
+        className="shrink-0 p-1.5 -ml-1.5 rounded-lg text-ink-2 hover:bg-lift hover:text-ink transition-colors cursor-pointer"
+        aria-label="메뉴 열기"
+      >
+        <HamburgerIcon />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-bold tracking-widest uppercase text-ink-3 leading-none mb-0.5">
+          Lesson {quiz.lesson}
+        </p>
+        <p className="text-[13px] font-semibold text-ink truncate leading-tight">
+          {quiz.title}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [idx, setIdx] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const mainRef = useRef(null);
-
-  function selectQuiz(i) {
-    setIdx(i);
-    setDrawerOpen(false);
-    mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
-  }
-
-  const current = flat[idx];
 
   const navContent = (
     <>
@@ -77,25 +109,25 @@ export default function App() {
               </p>
             )}
             <div className="flex flex-col gap-0.5">
-              {sec.quizzes.map((q) => {
-                const i = flat.indexOf(q);
-                return (
-                  <button
-                    key={q.lesson}
-                    onClick={() => selectQuiz(i)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-colors duration-150
-                      ${i === idx
-                        ? "bg-tint-2 text-ink font-semibold"
-                        : "text-ink-2 hover:bg-tint hover:text-ink font-medium"
-                      }`}
-                  >
-                    <span className="block text-[10px] font-bold tracking-widest uppercase mb-0.5 text-ink-3">
-                      Lesson {q.lesson}
-                    </span>
-                    {q.title}
-                  </button>
-                );
-              })}
+              {sec.quizzes.map((q) => (
+                <NavLink
+                  key={q.lesson}
+                  to={`/lesson/${q.lesson}`}
+                  onClick={() => setDrawerOpen(false)}
+                  className={({ isActive }) =>
+                    `w-full text-left px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-colors duration-150
+                    ${isActive
+                      ? "bg-tint-2 text-ink font-semibold"
+                      : "text-ink-2 hover:bg-tint hover:text-ink font-medium"
+                    }`
+                  }
+                >
+                  <span className="block text-[10px] font-bold tracking-widest uppercase mb-0.5 text-ink-3">
+                    Lesson {q.lesson}
+                  </span>
+                  {q.title}
+                </NavLink>
+              ))}
             </div>
           </div>
         ))}
@@ -107,23 +139,9 @@ export default function App() {
     <div className="flex h-screen overflow-hidden">
 
       {/* ── 모바일 상단 바 ── */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card border-b border-stroke flex items-center gap-3 px-4">
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="shrink-0 p-1.5 -ml-1.5 rounded-lg text-ink-2 hover:bg-lift hover:text-ink transition-colors cursor-pointer"
-          aria-label="메뉴 열기"
-        >
-          <HamburgerIcon />
-        </button>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold tracking-widest uppercase text-ink-3 leading-none mb-0.5">
-            Lesson {current.lesson}
-          </p>
-          <p className="text-[13px] font-semibold text-ink truncate leading-tight">
-            {current.title}
-          </p>
-        </div>
-      </div>
+      <Routes>
+        <Route path="/lesson/:lessonId" element={<MobileTopBar onOpenDrawer={() => setDrawerOpen(true)} />} />
+      </Routes>
 
       {/* ── 모바일 드로어 백드롭 ── */}
       <div
@@ -147,7 +165,11 @@ export default function App() {
 
       {/* ── 본문 ── */}
       <main ref={mainRef} className="flex-1 overflow-y-auto pt-14 md:pt-0">
-        <QuizPage key={current.lesson} quiz={current} />
+        <Routes>
+          <Route path="/" element={<Navigate to={`/lesson/${firstLesson}`} replace />} />
+          <Route path="/lesson/:lessonId" element={<QuizRoute mainRef={mainRef} />} />
+          <Route path="*" element={<Navigate to={`/lesson/${firstLesson}`} replace />} />
+        </Routes>
       </main>
 
     </div>
