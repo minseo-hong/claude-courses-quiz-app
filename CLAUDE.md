@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 
-Anthropic의 [Claude Academy](https://anthropic.skilljar.com) 강의 본문을 URL로 추출하고, 각 코스의 종합 기출 퀴즈를 React 앱으로 제공하는 프로젝트. 현재 **Claude 101**이 등록되어 있으며, 이후 다른 Claude 코스(Claude Code, MCP 등)가 추가될 예정이다.
+Anthropic의 [Claude Academy](https://anthropic.skilljar.com) 강의 본문을 URL로 추출하고, 각 코스의 종합 기출 퀴즈와 한국어 번역 본문을 React 앱으로 제공하는 프로젝트. 현재 **Claude 101**이 등록되어 있으며, 이후 다른 Claude 코스(Claude Code, MCP 등)가 추가될 예정이다.
 
 프로젝트 패키지명: `claude-courses-quiz-app`
 
@@ -25,13 +25,39 @@ claude/
 ├── public/
 │   └── favicon.svg                         # Claude 브랜드 오렌지(#D97757) 스파클 심볼
 └── src/
-    ├── main.jsx
-    ├── App.jsx                             # 사이드바 + 본문 레이아웃, 코스별 섹션 렌더링
-    ├── global.css                          # Tailwind import + @theme 디자인 토큰 + base 스타일
-    ├── components/
-    │   ├── QuizPage.jsx                    # 퀴즈 페이지 레이아웃
-    │   ├── QuizCard.jsx                    # 개별 문항 카드 (정답/해설 토글)
-    │   └── Chip.jsx                        # 복수 정답 칩
+    ├── main.jsx                            # React 진입점 (RouterProvider 렌더)
+    ├── App.jsx                             # createBrowserRouter 객체 기반 라우트 정의
+    ├── global.css                          # Tailwind import + @theme 디자인 토큰
+    ├── quizzes.js                          # 퀴즈 데이터 로더 + URL 헬퍼 (courseSlug, lessonPath 등)
+    ├── contents.js                         # 레슨 번역 콘텐츠 로더 (slug → 컴포넌트)
+    ├── components/                         # 폴더 컴포넌트 구조 (각 컴포넌트 = 폴더 + index.jsx 배럴)
+    │   ├── Layout/                         # 앱 셸 (사이드바 + 본문 + <Outlet />)
+    │   │   ├── DrawerBackdrop/
+    │   │   ├── MainContent/                #   <main> + 라우트 변경 시 스크롤 리셋
+    │   │   ├── MobileTopBar/
+    │   │   └── Sidebar/
+    │   │       ├── SidebarHeader/          #     "Claude Courses" 브랜드 + 모바일 닫기 버튼
+    │   │       └── SidebarNav/
+    │   │           └── SidebarSection/
+    │   │               └── SidebarNavItem/ #         단일 NavLink → 퀴즈 페이지로 이동
+    │   ├── LessonTabs/                     # 강의 내용 ↔ 복습 퀴즈 탭 (두 페이지 공유)
+    │   ├── ContentPage/                    # 강의 내용 페이지 (/content 서브리소스)
+    │   └── QuizPage/                       # 복습 퀴즈 페이지
+    │       ├── QuizPageHeader/
+    │       └── QuizQuestionList/
+    │           └── QuizCard/               #     reveal 상태 소유 + 카드 조립
+    │               ├── QuizCardHeader/     #       Q번호 + 타입 레이블
+    │               ├── QuizCategory/
+    │               ├── QuizQuestion/
+    │               ├── QuizOptions/
+    │               │   └── QuizOption/
+    │               ├── QuizAnswer/
+    │               │   └── Chip/           #         복수 정답 chip
+    │               ├── QuizExplanation/
+    │               ├── RevealButton/
+    │               └── HideButton/
+    ├── content/                            # 레슨별 한국어 번역 JSX (slug.jsx → 자동 등록)
+    │   └── {slug}.jsx
     └── data/
         ├── sections.js                     # 코스별 섹션 그룹 정의 (사이드바)
         └── {id}-{이름}.js                  # 퀴즈 데이터 파일 (앱에 자동 등록)
@@ -43,7 +69,40 @@ claude/
 - 종합 시험 파일: `r{번호}-{이름}.js` 형식. 예: `r1-final-exam.js`, `r2-exam-2.js`
 - `lesson` 필드에 동일한 식별자를 기입하고, `sections.js`에 등록해야 사이드바에 표시된다.
 
-## 강의 콘텐츠 수집
+## 컴포넌트 구조 원칙
+
+- **폴더 컴포넌트 구조**: 각 컴포넌트는 자신의 이름을 가진 폴더를 가지고 `{Name}.jsx` + `index.jsx`(배럴) 쌍으로 구성된다.
+- **1파일 1컴포넌트**: 한 파일에 하나의 컴포넌트만 정의한다. 내부 helper 컴포넌트도 별도 파일로 분리한다.
+- **자식은 부모 아래 중첩**: 특정 부모만 사용하는 자식 컴포넌트는 부모 폴더 하위로 배치해 사용 관계를 구조에 반영한다 (예: `QuizCard/QuizAnswer/Chip/`).
+- **공유 컴포넌트는 top-level**: 두 페이지 이상이 사용하는 컴포넌트는 `src/components/` 바로 아래에 둔다 (예: `LessonTabs/`).
+- **SRP 기반 분리**: Layout/QuizPage처럼 복합 화면은 오케스트레이터 + 시각·행위 단위 하위 컴포넌트로 나눈다.
+- **DIP (Presentational 분리)**: 하위 컴포넌트는 `quizzes`/`contents` 같은 데이터 모듈을 직접 import하지 않고 prop으로 주입받는다. 데이터에 대한 의존은 페이지·오케스트레이터 레벨로 국한한다.
+
+## 라우팅 & URL 구조
+
+- 라우터는 `react-router` v7의 `createBrowserRouter` + `RouterProvider` (객체 기반 구조). 정의 위치는 `src/App.jsx`.
+- URL은 REST API 계층을 따른다.
+
+| 리소스 | 경로 |
+|---|---|
+| 복습 퀴즈 | `/courses/:courseSlug/lessons/:slug` |
+| 강의 내용 | `/courses/:courseSlug/lessons/:slug/content` |
+| 루트/fallback | `/courses/claude-101/lessons/{첫 레슨 slug}` 로 리다이렉트 |
+
+- **Slug 생성 규칙** (`src/quizzes.js`의 `slugify`):
+  - 퀴즈 `title`을 소문자화 → Unicode 문자/숫자(`\p{L}\p{N}`)가 아닌 문자는 `-`로 치환 → 양끝 하이픈 정리
+  - 선행 `lesson-\d+-` 접두사는 제거 (예: "Lesson 1 · What is Claude?" → `what-is-claude`)
+  - 모의고사 제목처럼 한국어가 섞이면 한국어도 그대로 보존 (예: "1회 모의고사" → `1회-모의고사`)
+- **URL 조립 헬퍼** (`src/quizzes.js`):
+  - `courseSlug`: 현재 코스 slug 상수 (`'claude-101'`)
+  - `lessonPath(slug)`: 퀴즈 URL
+  - `lessonContentPath(slug)`: 콘텐츠 URL (`lessonPath(slug) + '/content'`)
+  - 경로 구조를 한 곳에 캡슐화 — 변경 시 호출부에 영향 없음
+- **주요 export**
+  - `src/quizzes.js`: `grouped`(섹션별 퀴즈), `quizBySlug`, `firstSlug`
+  - `src/contents.js`: `contentBySlug` — slug 단위 콘텐츠 컴포넌트 매핑
+
+## 강의 콘텐츠 수집 (원문 추출)
 
 ### 1. 세션 쿠키 설정 (`cookies.json`)
 
@@ -90,11 +149,20 @@ JS 렌더링이 완료된 후 본문 텍스트를 stdout으로 출력한다.
 Skilljar 사이드바의 섹션 헤더(H3)와 레슨 링크를 JSON으로 출력한다.
 강의 구조가 변경됐을 때 `sections.js` 업데이트에 활용한다.
 
+## 한국어 번역 콘텐츠 추가
+
+레슨 본문을 한국어로 번역해 웹 페이지에서 읽을 수 있게 하려면 `src/content/{slug}.jsx` 파일만 추가하면 된다.
+
+- 파일명 = 해당 퀴즈의 slug와 동일 (title로 자동 생성되는 값과 일치해야 함)
+- 기본 export는 React 컴포넌트 (JSX 구조 자유)
+- `contents.js`가 `import.meta.glob`으로 자동 등록 → 앱 재빌드 불필요
+- 콘텐츠가 있는 레슨은 `/lessons/:slug/content` 경로에서 렌더되며, `LessonTabs`가 자동으로 탭을 노출한다.
+- 본문은 흰색 카드(`bg-card border border-stroke rounded-card`) 안에 렌더되므로 별도 배경 스타일이 필요하지 않다. 디자인 토큰(`text-ink`, `text-ink-2` 등)만 사용해 가독성을 맞춘다.
+
 ## 퀴즈 데이터 작성 규칙
 
 - 문항 유형: 정보처리기사 **필기+실기** 스타일 — `choice` 위주, 핵심 용어 암기는 `fill`/`term`
 - **정답·해설은 기본 숨김**: 버튼 클릭 시 표시 (객관식 "정답 확인", 나머지 "정답 · 해설 보기")
-- 레슨 전환 시 열람 상태가 자동 초기화된다 (`key={quiz.lesson}` 처리)
 
 ### 종합 모의고사 구성 원칙
 
@@ -115,8 +183,8 @@ Skilljar 사이드바의 섹션 헤더(H3)와 레슨 링크를 JSON으로 출력
 
 ```js
 export default {
-  lesson: 'r1',            // sections.js의 lessons 배열과 일치해야 함
-  title: '1회 모의고사',
+  lesson: 'r1',            // sections.js의 lessons 배열과 일치해야 함 (내부 식별자)
+  title: '1회 모의고사',    // URL slug는 이 title에서 자동 생성된다
   questions: [
     {
       id: 1,
@@ -135,6 +203,8 @@ export default {
   ],
 }
 ```
+
+- `lesson`은 `sections.js`와 연결되는 내부 식별자이고, URL에 노출되는 slug는 `title`에서 자동 파생되므로 따로 작성할 필요가 없다.
 
 ### 문항 유형 요약
 
@@ -177,14 +247,14 @@ export default [
 ]
 ```
 
-- `title`이 빈 문자열이면 섹션 헤더가 렌더링되지 않는다 (App.jsx 조건부 처리)
+- `title`이 빈 문자열이면 섹션 헤더가 렌더링되지 않는다 (`SidebarSection`이 조건부 처리)
 - 숫자 식별자(`'01'~'14'`)는 자동으로 오름차순 정렬
 - 비숫자 식별자(`'r1'`, `'r2'`)는 숫자 항목 뒤에 알파벳 순으로 정렬
-- 사이드바 상단 고정 헤더는 `Claude Courses` (App.jsx에서 직접 렌더링)
+- 사이드바 상단 고정 헤더 `Claude Courses`는 `Layout/Sidebar/SidebarHeader`가 렌더링
 
 ## 스타일링 — Tailwind CSS v4
 
-CSS Module 없이 Tailwind CSS v4 인라인 클래스로 스타일링한다.
+CSS Module 없이 Tailwind CSS v4 인라인 클래스로 스타일링한다. 아이콘은 [`lucide-react`](https://lucide.dev)에서 불러오며 기본 `strokeWidth`를 사용한다.
 
 ### 디자인 토큰 (`src/global.css` `@theme`)
 
@@ -215,6 +285,8 @@ npm run dev       # 개발 서버
 npm run build     # 프로덕션 빌드 → dist/
 npm run preview   # 빌드 결과 미리보기
 ```
+
+주요 의존성: `react`, `react-dom`, `react-router`, `lucide-react`, `tailwindcss`, `@tailwindcss/vite`.
 
 ## 배포 (Vercel)
 
