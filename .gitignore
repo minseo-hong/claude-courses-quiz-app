@@ -1,13 +1,29 @@
+# Dependencies
 node_modules/
-dist/
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Build output
+/build
+/dist
+
+# TypeScript
+*.tsbuildinfo
+
+# Python
 .venv/
+
+# Skilljar (auth & scraped source)
 cookies.json
 markdown/
 
-# macOS
+# OS
 .DS_Store
 
-# Editor
+# Editors
 .vscode/
 .idea/
 
@@ -16,6 +32,7 @@ markdown/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
 # Env
 .env
