@@ -1,6 +1,7 @@
 export default {
   lesson: 'r4',
   title: '4회 모의고사',
+  slug: 'mock-exam-4',
   questions: [
     {
       id: 1,

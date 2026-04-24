@@ -1,6 +1,7 @@
 export default {
   lesson: 'r3',
   title: '3회 모의고사',
+  slug: 'mock-exam-3',
   questions: [
     {
       id: 1,

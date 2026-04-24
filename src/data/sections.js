@@ -1,11 +1,11 @@
 export default [
   {
     title: 'Meet Claude',
-    lessons: ['01', '02', '03', '04'],
+    lessons: ['01', '02', '03', '04', 's1'],
   },
   {
     title: 'Organizing your work and knowledge',
-    lessons: ['05', '06', '07'],
+    lessons: ['05', '06', '07', 's2'],
   },
   {
     title: "Expanding Claude's reach",
