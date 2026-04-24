@@ -126,3 +126,17 @@ export const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
 
 const flat = grouped.flatMap((sec) => sec.quizzes)
 export const firstSlug: string = flat[0]?.slug ?? ''
+
+const flatSidebarItems: SidebarItem[] = sidebarSections.flatMap((s) => s.items)
+
+export function getNextSidebarItem(href: string): SidebarItem | null {
+  const idx = flatSidebarItems.findIndex((i) => i.href === href)
+  if (idx < 0 || idx >= flatSidebarItems.length - 1) return null
+  return flatSidebarItems[idx + 1]
+}
+
+export function getPrevSidebarItem(href: string): SidebarItem | null {
+  const idx = flatSidebarItems.findIndex((i) => i.href === href)
+  if (idx <= 0) return null
+  return flatSidebarItems[idx - 1]
+}

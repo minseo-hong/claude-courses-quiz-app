@@ -1,7 +1,13 @@
 import { notFound } from 'next/navigation'
 import ContentPage from '@/components/ContentPage'
 import { getContent, getContentSlugs } from '@/lib/content'
-import { courseSlug, quizBySlug } from '@/lib/quizzes'
+import {
+  courseSlug,
+  getNextSidebarItem,
+  getPrevSidebarItem,
+  quizBySlug,
+} from '@/lib/quizzes'
+import { lessonContentPath } from '@/lib/urls'
 
 export function generateStaticParams() {
   return getContentSlugs()
@@ -16,5 +22,15 @@ export default async function LessonContentPage(
   const quiz = quizBySlug[slug]
   const source = getContent(slug)
   if (!quiz || !source) notFound()
-  return <ContentPage quiz={quiz} source={source} />
+  const href = lessonContentPath(slug)
+  const prevItem = getPrevSidebarItem(href)
+  const nextItem = getNextSidebarItem(href)
+  return (
+    <ContentPage
+      quiz={quiz}
+      source={source}
+      prevItem={prevItem}
+      nextItem={nextItem}
+    />
+  )
 }

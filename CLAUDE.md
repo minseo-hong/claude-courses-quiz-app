@@ -67,6 +67,9 @@ claude-courses-quiz-app/
     │   ├── MarkdownContent/                #   react-markdown 래퍼 (클라이언트)
     │   │   ├── MarkdownContent.tsx
     │   │   └── markdownComponents.tsx      #   HTML 태그별 Tailwind 스타일 매핑
+    │   ├── PageNavigation/                 #   페이지 하단 이전/다음 네비 (서버)
+    │   │   ├── PrevPageButton/
+    │   │   └── NextPageButton/
     │   ├── ContentPage/                    #   번역본 페이지 구성 (서버)
     │   └── QuizPage/                       #   퀴즈 페이지 구성 (서버)
     │       ├── QuizPageHeader/

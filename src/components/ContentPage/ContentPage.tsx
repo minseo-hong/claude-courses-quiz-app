@@ -1,12 +1,15 @@
-import type { Quiz } from '@/lib/quizzes'
+import type { Quiz, SidebarItem } from '@/lib/quizzes'
 import MarkdownContent from '../MarkdownContent'
+import PageNavigation from '../PageNavigation'
 
 type Props = {
   quiz: Quiz
   source: string
+  prevItem: SidebarItem | null
+  nextItem: SidebarItem | null
 }
 
-export default function ContentPage({ quiz, source }: Props) {
+export default function ContentPage({ quiz, source, prevItem, nextItem }: Props) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">
       <header className="mb-8 sm:mb-10">
@@ -21,6 +24,7 @@ export default function ContentPage({ quiz, source }: Props) {
       <div className="bg-card border border-stroke rounded-card p-6 sm:p-10">
         <MarkdownContent source={source} />
       </div>
+      <PageNavigation prev={prevItem} next={nextItem} />
     </div>
   )
 }
