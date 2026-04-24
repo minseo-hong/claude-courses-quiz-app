@@ -23,7 +23,7 @@ export default function SidebarNavItem({ item, onSelect }: Props) {
     <Link
       href={item.href}
       onClick={onSelect}
-      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13px] cursor-pointer transition-colors duration-150
+      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[12px] cursor-pointer transition-colors duration-150
         ${
           isActive
             ? 'bg-tint-2 text-ink font-semibold'
