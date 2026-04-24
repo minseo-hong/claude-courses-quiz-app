@@ -17,11 +17,6 @@ import s1 from '@/data/s1-meet-claude-review'
 import s2 from '@/data/s2-organizing-knowledge-review'
 import s3 from '@/data/s3-expanding-reach-review'
 import s4 from '@/data/s4-putting-it-together-review'
-import r1 from '@/data/r1-final-exam'
-import r2 from '@/data/r2-exam-2'
-import r3 from '@/data/r3-exam-3'
-import r4 from '@/data/r4-exam-4'
-import r5 from '@/data/r5-exam-5'
 
 export type QuizType = 'choice' | 'fill' | 'term' | 'short'
 
@@ -66,7 +61,6 @@ const quizModules = [
   q01, q02, q03, q04, q05, q06, q07, q08, q09, q10,
   q11, q12, q13,
   s1, s2, s3, s4,
-  r1, r2, r3, r4, r5,
 ] as unknown as QuizModule[]
 
 const quizzes: Quiz[] = quizModules

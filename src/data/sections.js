@@ -19,8 +19,4 @@ export default [
     title: 'Conclusion & certificate',
     lessons: ['13'],
   },
-  {
-    title: '기출 모의고사',
-    lessons: ['r1', 'r2', 'r3', 'r4', 'r5'],
-  },
 ]
