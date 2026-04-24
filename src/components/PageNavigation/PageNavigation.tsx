@@ -11,7 +11,7 @@ export default function PageNavigation({ prev, next }: Props) {
   if (!prev && !next) return null
 
   return (
-    <nav className="mt-12 flex gap-3 sm:gap-4">
+    <nav className="mt-6 flex gap-6">
       {prev ? <PrevPageButton item={prev} /> : <div className="flex-1" />}
       {next ? <NextPageButton item={next} /> : <div className="flex-1" />}
     </nav>
