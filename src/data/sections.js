@@ -17,6 +17,6 @@ export default [
   },
   {
     title: 'Conclusion & certificate',
-    lessons: ['13'],
+    lessons: ['13', 'final'],
   },
 ]
