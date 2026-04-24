@@ -1,5 +1,4 @@
 import type { Quiz } from '@/lib/quizzes'
-import LessonTabs from '../LessonTabs'
 import MarkdownContent from '../MarkdownContent'
 
 type Props = {
@@ -19,7 +18,6 @@ export default function ContentPage({ quiz, source }: Props) {
         </h1>
         <p className="text-sm text-ink-2">강의 내용</p>
       </header>
-      <LessonTabs slug={quiz.slug} />
       <div className="bg-card border border-stroke rounded-card p-6 sm:p-10">
         <MarkdownContent source={source} />
       </div>

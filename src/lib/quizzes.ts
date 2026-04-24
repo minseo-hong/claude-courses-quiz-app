@@ -1,4 +1,6 @@
 import SECTIONS from '@/data/sections'
+import { hasContent } from './content'
+import { lessonContentPath, lessonPath } from './urls'
 
 import q01 from '@/data/01-what-is-claude'
 import q02 from '@/data/02-first-conversation'
@@ -45,7 +47,15 @@ export type Section = {
   quizzes: Quiz[]
 }
 
-export type SidebarItem = { lesson: string; slug: string; title: string }
+export type SidebarItemKind = 'content' | 'quiz'
+export type SidebarItem = {
+  lesson: string
+  slug: string
+  title: string
+  kind: SidebarItemKind
+  href: string
+  label?: string
+}
 export type SidebarSection = { title: string; items: SidebarItem[] }
 
 export { courseSlug, lessonPath, lessonContentPath } from './urls'
@@ -90,7 +100,28 @@ export const grouped: Section[] = sectionsRaw
 
 export const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
   title: sec.title,
-  items: sec.quizzes.map((q) => ({ lesson: q.lesson, slug: q.slug, title: q.title })),
+  items: sec.quizzes.flatMap((q) => {
+    const items: SidebarItem[] = []
+    if (hasContent(q.slug)) {
+      items.push({
+        lesson: q.lesson,
+        slug: q.slug,
+        title: q.title,
+        kind: 'content',
+        href: lessonContentPath(q.slug),
+        label: '강의 내용',
+      })
+    }
+    items.push({
+      lesson: q.lesson,
+      slug: q.slug,
+      title: q.title,
+      kind: 'quiz',
+      href: lessonPath(q.slug),
+      label: '복습 퀴즈',
+    })
+    return items
+  }),
 }))
 
 const flat = grouped.flatMap((sec) => sec.quizzes)

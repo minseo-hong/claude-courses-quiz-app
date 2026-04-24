@@ -17,7 +17,7 @@ export default function SidebarSection({ section, isFirst, onItemSelect }: Props
       )}
       <div className="flex flex-col gap-0.5">
         {section.items.map((item) => (
-          <SidebarNavItem key={item.lesson} item={item} onSelect={onItemSelect} />
+          <SidebarNavItem key={item.href} item={item} onSelect={onItemSelect} />
         ))}
       </div>
     </div>
