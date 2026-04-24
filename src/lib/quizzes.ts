@@ -1,6 +1,6 @@
 import SECTIONS from '@/data/sections'
 import { hasContent } from './content'
-import { lessonContentPath, lessonPath } from './urls'
+import { lessonContentPath, lessonQuizPath } from './urls'
 
 import q01 from '@/data/01-what-is-claude'
 import q02 from '@/data/02-first-conversation'
@@ -58,7 +58,7 @@ export type SidebarItem = {
 }
 export type SidebarSection = { title: string; items: SidebarItem[] }
 
-export { courseSlug, lessonPath, lessonContentPath } from './urls'
+export { courseSlug, lessonContentPath, lessonQuizPath } from './urls'
 
 function slugify(title: string): string {
   return title
@@ -117,7 +117,7 @@ export const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
       slug: q.slug,
       title: q.title,
       kind: 'quiz',
-      href: lessonPath(q.slug),
+      href: lessonQuizPath(q.slug),
       label: '복습 퀴즈',
     })
     return items

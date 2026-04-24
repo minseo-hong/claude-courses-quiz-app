@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { firstSlug } from '@/lib/quizzes'
-import { lessonPath } from '@/lib/urls'
+import { lessonQuizPath } from '@/lib/urls'
 
 export default function Page() {
-  redirect(lessonPath(firstSlug))
+  redirect(lessonQuizPath(firstSlug))
 }
