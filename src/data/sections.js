@@ -9,11 +9,11 @@ export default [
   },
   {
     title: "Expanding Claude's reach",
-    lessons: ['08', '09', '10'],
+    lessons: ['08', '09', '10', 's3'],
   },
   {
     title: 'Putting it all together',
-    lessons: ['11', '12'],
+    lessons: ['11', '12', 's4'],
   },
   {
     title: 'Conclusion & certificate',
