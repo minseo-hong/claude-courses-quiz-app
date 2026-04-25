@@ -19,7 +19,17 @@ type Props = {
 export default function QuizCard({ question, index }: Props) {
   const { type, category, question: text, options, answers, explanation } = question
   const [revealed, setRevealed] = useState(false)
+  const [selected, setSelected] = useState<string | null>(null)
   const isChoice = type === 'choice'
+
+  const handleSelect = (opt: string) => {
+    setSelected(opt)
+    setRevealed(true)
+  }
+  const handleHide = () => {
+    setSelected(null)
+    setRevealed(false)
+  }
 
   return (
     <div className="bg-card border border-stroke rounded-card p-5 sm:p-7 mb-3 sm:mb-4">
@@ -28,14 +38,20 @@ export default function QuizCard({ question, index }: Props) {
       <QuizQuestion html={text} />
 
       {isChoice && options && (
-        <QuizOptions options={options} answers={answers} revealed={revealed} />
+        <QuizOptions
+          options={options}
+          answers={answers}
+          revealed={revealed}
+          selected={selected}
+          onSelect={handleSelect}
+        />
       )}
 
       {revealed ? (
         <div className="border-t border-tint pt-4 flex flex-col gap-2.5">
           {!isChoice && <QuizAnswer answers={answers} />}
           <QuizExplanation html={explanation} />
-          <HideButton onClick={() => setRevealed(false)} />
+          <HideButton onClick={handleHide} />
         </div>
       ) : (
         <div className="border-t border-tint pt-4">
