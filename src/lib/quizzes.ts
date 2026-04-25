@@ -1,25 +1,6 @@
-import SECTIONS from '@/data/sections'
+import COURSES from '@/data/courses'
 import { hasContent } from './content'
-import { lessonContentPath, lessonQuizPath } from './urls'
-
-import q01 from '@/data/01-what-is-claude'
-import q02 from '@/data/02-first-conversation'
-import q03 from '@/data/03-getting-better-results'
-import q04 from '@/data/04-desktop-app-chat-cowork-code'
-import q05 from '@/data/05-introduction-to-projects'
-import q06 from '@/data/06-creating-with-artifacts'
-import q07 from '@/data/07-working-with-skills'
-import q08 from '@/data/08-connecting-your-tools'
-import q09 from '@/data/09-enterprise-search'
-import q10 from '@/data/10-research-mode-for-deep-dives'
-import q11 from '@/data/11-claude-in-action-use-cases-by-role'
-import q12 from '@/data/12-other-ways-to-work-with-claude'
-import q13 from '@/data/13-whats-next'
-import s1 from '@/data/s1-meet-claude-review'
-import s2 from '@/data/s2-organizing-knowledge-review'
-import s3 from '@/data/s3-expanding-reach-review'
-import s4 from '@/data/s4-putting-it-together-review'
-import final_ from '@/data/final-review'
+import { coursePath, lessonContentPath, lessonQuizPath } from './urls'
 
 export type QuizType = 'choice' | 'fill' | 'term' | 'short'
 
@@ -58,7 +39,25 @@ export type SidebarItem = {
 }
 export type SidebarSection = { title: string; items: SidebarItem[] }
 
-export { courseSlug, lessonContentPath, lessonQuizPath } from './urls'
+export type CourseSummary = {
+  slug: string
+  title: string
+  shortTitle: string
+  href: string
+  hasLessons: boolean
+}
+
+export type CourseBundle = {
+  slug: string
+  title: string
+  shortTitle: string
+  sidebarSections: SidebarSection[]
+  quizBySlug: Record<string, Quiz>
+  firstSlug: string
+  hasLessons: boolean
+}
+
+export { coursePath, lessonContentPath, lessonQuizPath } from './urls'
 
 function slugify(title: string): string {
   return title
@@ -68,75 +67,131 @@ function slugify(title: string): string {
     .replace(/^lesson-\d+-/, '')
 }
 
-const quizModules = [
-  q01, q02, q03, q04, q05, q06, q07, q08, q09, q10,
-  q11, q12, q13,
-  s1, s2, s3, s4,
-  final_,
-] as unknown as QuizModule[]
+type RawCourse = {
+  slug: string
+  title: string
+  shortTitle: string
+  data: {
+    sections: Array<{ title: string; lessons: string[] }>
+    quizModules: QuizModule[]
+  }
+}
 
-const quizzes: Quiz[] = quizModules
-  .map((m) => ({ ...m, slug: m.slug ?? slugify(m.title) }))
-  .sort((a, b) => {
-    const na = Number(a.lesson)
-    const nb = Number(b.lesson)
-    if (Number.isNaN(na) && Number.isNaN(nb)) return a.lesson.localeCompare(b.lesson)
-    if (Number.isNaN(na)) return 1
-    if (Number.isNaN(nb)) return -1
-    return na - nb
-  })
+const rawCourses = COURSES as unknown as RawCourse[]
 
-const quizByLesson: Record<string, Quiz> = Object.fromEntries(quizzes.map((q) => [q.lesson, q]))
-export const quizBySlug: Record<string, Quiz> = Object.fromEntries(quizzes.map((q) => [q.slug, q]))
+function buildCourse(raw: RawCourse): CourseBundle {
+  const quizzes: Quiz[] = raw.data.quizModules
+    .map((m) => ({ ...m, slug: m.slug ?? slugify(m.title) }))
+    .sort((a, b) => {
+      const na = Number(a.lesson)
+      const nb = Number(b.lesson)
+      if (Number.isNaN(na) && Number.isNaN(nb)) return a.lesson.localeCompare(b.lesson)
+      if (Number.isNaN(na)) return 1
+      if (Number.isNaN(nb)) return -1
+      return na - nb
+    })
 
-const sectionsRaw = SECTIONS as unknown as Array<{ title: string; lessons: string[] }>
+  const quizByLesson: Record<string, Quiz> = Object.fromEntries(
+    quizzes.map((q) => [q.lesson, q]),
+  )
+  const quizBySlug: Record<string, Quiz> = Object.fromEntries(
+    quizzes.map((q) => [q.slug, q]),
+  )
 
-export const grouped: Section[] = sectionsRaw
-  .map((sec) => ({
+  const grouped: Section[] = raw.data.sections
+    .map((sec) => ({
+      title: sec.title,
+      quizzes: sec.lessons.map((l) => quizByLesson[l]).filter(Boolean) as Quiz[],
+    }))
+    .filter((sec) => sec.quizzes.length > 0)
+
+  const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
     title: sec.title,
-    quizzes: sec.lessons.map((l) => quizByLesson[l]).filter(Boolean) as Quiz[],
-  }))
-  .filter((sec) => sec.quizzes.length > 0)
-
-export const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
-  title: sec.title,
-  items: sec.quizzes.flatMap((q) => {
-    const items: SidebarItem[] = []
-    if (hasContent(q.slug)) {
+    items: sec.quizzes.flatMap((q) => {
+      const items: SidebarItem[] = []
+      if (hasContent(raw.slug, q.slug)) {
+        items.push({
+          lesson: q.lesson,
+          slug: q.slug,
+          title: q.title,
+          kind: 'content',
+          href: lessonContentPath(raw.slug, q.slug),
+          label: '강의 내용',
+        })
+      }
       items.push({
         lesson: q.lesson,
         slug: q.slug,
         title: q.title,
-        kind: 'content',
-        href: lessonContentPath(q.slug),
-        label: '강의 내용',
+        kind: 'quiz',
+        href: lessonQuizPath(raw.slug, q.slug),
+        label: '복습 퀴즈',
       })
-    }
-    items.push({
-      lesson: q.lesson,
-      slug: q.slug,
-      title: q.title,
-      kind: 'quiz',
-      href: lessonQuizPath(q.slug),
-      label: '복습 퀴즈',
-    })
-    return items
-  }),
-}))
+      return items
+    }),
+  }))
 
-const flat = grouped.flatMap((sec) => sec.quizzes)
-export const firstSlug: string = flat[0]?.slug ?? ''
+  const firstSlug = grouped.flatMap((sec) => sec.quizzes)[0]?.slug ?? ''
 
-const flatSidebarItems: SidebarItem[] = sidebarSections.flatMap((s) => s.items)
-
-export function getNextSidebarItem(href: string): SidebarItem | null {
-  const idx = flatSidebarItems.findIndex((i) => i.href === href)
-  if (idx < 0 || idx >= flatSidebarItems.length - 1) return null
-  return flatSidebarItems[idx + 1]
+  return {
+    slug: raw.slug,
+    title: raw.title,
+    shortTitle: raw.shortTitle,
+    sidebarSections,
+    quizBySlug,
+    firstSlug,
+    hasLessons: quizzes.length > 0,
+  }
 }
 
-export function getPrevSidebarItem(href: string): SidebarItem | null {
-  const idx = flatSidebarItems.findIndex((i) => i.href === href)
+const courseBundles: Record<string, CourseBundle> = Object.fromEntries(
+  rawCourses.map((c) => [c.slug, buildCourse(c)]),
+)
+
+export const courseSlugs: string[] = rawCourses.map((c) => c.slug)
+
+export function getCourse(courseSlug: string): CourseBundle | null {
+  return courseBundles[courseSlug] ?? null
+}
+
+export const courseSummaries: CourseSummary[] = rawCourses.map((c) => {
+  const bundle = courseBundles[c.slug]
+  return {
+    slug: c.slug,
+    title: c.title,
+    shortTitle: c.shortTitle,
+    href: bundle.hasLessons
+      ? lessonQuizPath(c.slug, bundle.firstSlug)
+      : coursePath(c.slug),
+    hasLessons: bundle.hasLessons,
+  }
+})
+
+export function getDefaultCourse(): CourseBundle {
+  const first = rawCourses.find((c) => courseBundles[c.slug].hasLessons) ?? rawCourses[0]
+  return courseBundles[first.slug]
+}
+
+export function getNextSidebarItem(
+  courseSlug: string,
+  href: string,
+): SidebarItem | null {
+  const bundle = courseBundles[courseSlug]
+  if (!bundle) return null
+  const flat = bundle.sidebarSections.flatMap((s) => s.items)
+  const idx = flat.findIndex((i) => i.href === href)
+  if (idx < 0 || idx >= flat.length - 1) return null
+  return flat[idx + 1]
+}
+
+export function getPrevSidebarItem(
+  courseSlug: string,
+  href: string,
+): SidebarItem | null {
+  const bundle = courseBundles[courseSlug]
+  if (!bundle) return null
+  const flat = bundle.sidebarSections.flatMap((s) => s.items)
+  const idx = flat.findIndex((i) => i.href === href)
   if (idx <= 0) return null
-  return flatSidebarItems[idx - 1]
+  return flat[idx - 1]
 }

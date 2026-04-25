@@ -4,15 +4,16 @@ import QuizPageHeader from './QuizPageHeader'
 import QuizQuestionList from './QuizQuestionList'
 
 type Props = {
+  courseTitle: string
   quiz: Quiz
   prevItem: SidebarItem | null
   nextItem: SidebarItem | null
 }
 
-export default function QuizPage({ quiz, prevItem, nextItem }: Props) {
+export default function QuizPage({ courseTitle, quiz, prevItem, nextItem }: Props) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">
-      <QuizPageHeader quiz={quiz} />
+      <QuizPageHeader courseTitle={courseTitle} quiz={quiz} />
       <QuizQuestionList questions={quiz.questions} />
       <PageNavigation prev={prevItem} next={nextItem} />
     </div>

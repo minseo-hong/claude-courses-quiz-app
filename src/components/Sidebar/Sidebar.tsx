@@ -1,14 +1,24 @@
-import type { SidebarSection } from '@/lib/quizzes'
+import type { CourseSummary, SidebarSection } from '@/lib/quizzes'
 import SidebarHeader from './SidebarHeader'
 import SidebarNav from './SidebarNav'
+import CourseSwitcher from './CourseSwitcher'
+import SidebarEmptyState from './SidebarEmptyState'
 
 type Props = {
   open: boolean
   onClose: () => void
   sections: SidebarSection[]
+  courses: CourseSummary[]
+  currentCourseSlug: string
 }
 
-export default function Sidebar({ open, onClose, sections }: Props) {
+export default function Sidebar({
+  open,
+  onClose,
+  sections,
+  courses,
+  currentCourseSlug,
+}: Props) {
   return (
     <aside
       className={`
@@ -21,7 +31,16 @@ export default function Sidebar({ open, onClose, sections }: Props) {
     `}
     >
       <SidebarHeader onClose={onClose} />
-      <SidebarNav sections={sections} onItemSelect={onClose} open={open} />
+      <CourseSwitcher
+        courses={courses}
+        currentCourseSlug={currentCourseSlug}
+        onSelect={onClose}
+      />
+      {sections.length > 0 ? (
+        <SidebarNav sections={sections} onItemSelect={onClose} open={open} />
+      ) : (
+        <SidebarEmptyState />
+      )}
     </aside>
   )
 }

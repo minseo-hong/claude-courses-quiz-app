@@ -1,27 +1,33 @@
 'use client'
 
-import { BookOpen, ListChecks, Menu } from 'lucide-react'
+import { BookOpen, ListChecks, Menu, Sparkles } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import type { SidebarSection } from '@/lib/quizzes'
 
 type Props = {
   sections: SidebarSection[]
+  currentCourseTitle: string
   onOpenDrawer: () => void
 }
 
-export default function MobileTopBar({ sections, onOpenDrawer }: Props) {
+export default function MobileTopBar({
+  sections,
+  currentCourseTitle,
+  onOpenDrawer,
+}: Props) {
   const pathname = usePathname()
   const item = sections
     .flatMap((s) => s.items)
     .find((i) => i.href === pathname)
 
-  if (!item) return null
-
-  const Icon = item.kind === 'content' ? BookOpen : ListChecks
-  const iconClasses =
-    item.kind === 'content'
+  const Icon = item ? (item.kind === 'content' ? BookOpen : ListChecks) : Sparkles
+  const iconClasses = item
+    ? item.kind === 'content'
       ? 'bg-accent-tint text-accent-dim'
       : 'bg-tint text-ink-2'
+    : 'bg-accent-tint text-accent-dim'
+  const label = item?.label ?? '현재 코스'
+  const title = item?.title ?? currentCourseTitle
 
   return (
     <div className="md:hidden fixed top-0 inset-x-0 z-40 h-14 bg-card border-b border-stroke flex items-center gap-3 px-4">
@@ -37,10 +43,10 @@ export default function MobileTopBar({ sections, onOpenDrawer }: Props) {
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-[10px] font-bold tracking-widest uppercase text-ink-3 leading-none mb-0.5">
-          {item.label}
+          {label}
         </p>
         <p className="text-[13px] font-semibold text-ink truncate leading-tight">
-          {item.title}
+          {title}
         </p>
       </div>
     </div>

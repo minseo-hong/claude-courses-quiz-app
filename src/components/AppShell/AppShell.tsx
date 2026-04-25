@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { SidebarSection } from '@/lib/quizzes'
+import type { CourseSummary, SidebarSection } from '@/lib/quizzes'
 import DrawerBackdrop from '../DrawerBackdrop'
 import MainContent from '../MainContent'
 import MobileTopBar from '../MobileTopBar'
@@ -9,10 +9,19 @@ import Sidebar from '../Sidebar'
 
 type Props = {
   sections: SidebarSection[]
+  courses: CourseSummary[]
+  currentCourseSlug: string
+  currentCourseTitle: string
   children: React.ReactNode
 }
 
-export default function AppShell({ sections, children }: Props) {
+export default function AppShell({
+  sections,
+  courses,
+  currentCourseSlug,
+  currentCourseTitle,
+  children,
+}: Props) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const openDrawer = () => setDrawerOpen(true)
   const closeDrawer = () => setDrawerOpen(false)
@@ -28,9 +37,19 @@ export default function AppShell({ sections, children }: Props) {
 
   return (
     <div className="flex min-h-screen">
-      <MobileTopBar sections={sections} onOpenDrawer={openDrawer} />
+      <MobileTopBar
+        sections={sections}
+        currentCourseTitle={currentCourseTitle}
+        onOpenDrawer={openDrawer}
+      />
       <DrawerBackdrop open={drawerOpen} onClick={closeDrawer} />
-      <Sidebar open={drawerOpen} onClose={closeDrawer} sections={sections} />
+      <Sidebar
+        open={drawerOpen}
+        onClose={closeDrawer}
+        sections={sections}
+        courses={courses}
+        currentCourseSlug={currentCourseSlug}
+      />
       <MainContent>{children}</MainContent>
     </div>
   )
