@@ -21,7 +21,7 @@ export default function Sidebar({ open, onClose, sections }: Props) {
     `}
     >
       <SidebarHeader onClose={onClose} />
-      <SidebarNav sections={sections} onItemSelect={onClose} />
+      <SidebarNav sections={sections} onItemSelect={onClose} open={open} />
     </aside>
   )
 }
