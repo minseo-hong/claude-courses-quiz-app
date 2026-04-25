@@ -1,5 +1,7 @@
 import sections from './sections'
 
-const quizModules = []
+import q01 from './01-what-is-claude-code'
+
+const quizModules = [q01]
 
 export default { sections, quizModules }
