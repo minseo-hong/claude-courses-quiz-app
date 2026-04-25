@@ -1,3 +1,4 @@
+import { Clock } from 'lucide-react'
 import type { Quiz, SidebarItem } from '@/lib/quizzes'
 import MarkdownContent from '../MarkdownContent'
 import PageNavigation from '../PageNavigation'
@@ -9,7 +10,13 @@ type Props = {
   nextItem: SidebarItem | null
 }
 
+const READING_TIME_RE = /^>\s*\*\*예상 소요 시간\s*([^*]+?)\*\*\s*\n+/
+
 export default function ContentPage({ quiz, source, prevItem, nextItem }: Props) {
+  const match = source.match(READING_TIME_RE)
+  const readingTime = match?.[1]?.trim() ?? null
+  const body = match ? source.slice(match[0].length) : source
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">
       <header className="mb-8 sm:mb-10">
@@ -19,10 +26,19 @@ export default function ContentPage({ quiz, source, prevItem, nextItem }: Props)
         <h1 className="text-2xl sm:text-3xl font-bold tracking-[-0.5px] mb-1.5">
           {quiz.title}
         </h1>
-        <p className="text-sm text-ink-2">강의 내용</p>
+        <p className="text-sm text-ink-2 inline-flex items-center gap-2">
+          <span>강의 내용</span>
+          {readingTime && (
+            <>
+              <span aria-hidden className="text-ink-3">·</span>
+              <Clock aria-hidden className="w-3.5 h-3.5 text-ink-3" />
+              <span>{readingTime}</span>
+            </>
+          )}
+        </p>
       </header>
       <div className="bg-card border border-stroke rounded-card p-6 sm:p-10">
-        <MarkdownContent source={source} />
+        <MarkdownContent source={body} />
       </div>
       <PageNavigation prev={prevItem} next={nextItem} />
     </div>
