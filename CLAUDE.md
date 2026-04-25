@@ -28,6 +28,7 @@ claude-courses-quiz-app/
 ├── fetch_lesson.py                         # URL → 강의 본문 텍스트 추출 스크립트 (Playwright)
 ├── fetch_all_lessons.py                    # 전체 레슨 마크다운 일괄 저장 스크립트
 ├── get_sidebar_structure.py                # Skilljar 사이드바 섹션·레슨 구조 추출
+├── fetch_lesson_videos.py                  # 레슨 페이지의 iframe·video src + 본문 이미지 URL 추출 (lesson 인덱스 인수 지원)
 ├── cookies.json                            # Skilljar 세션 쿠키 (git 제외)
 ├── .venv/                                  # Python 가상환경 (git 제외)
 ├── markdown/                               # 레슨 원문 마크다운 (git 제외 — 저작권 보호)
@@ -211,11 +212,14 @@ Skilljar 사이드바의 섹션 헤더(H3)와 레슨 링크를 JSON으로 출력
 ### 마크다운 작성 규칙
 
 - **본문 첫 H1은 생략**한다. 페이지 상단 헤더가 이미 레슨 제목을 출력하므로, 마크다운은 `##`부터 시작하는 것을 권장한다.
+- **첫 줄에 `> **예상 소요 시간 N분**` 형식의 blockquote**를 둔다. `ContentPage`가 정규식으로 추출해 본문 카드 밖 페이지 헤더의 "강의 내용 · ⏱ N분"으로 노출하고, 본문에서는 자동으로 제거된다. (다른 blockquote는 본문에 그대로 남아 콜아웃으로 렌더된다.)
 - **콜아웃/노트 박스**는 blockquote(`>`)로 작성한다 — 오렌지 액센트 왼쪽 바 + 연한 배경으로 렌더된다.
 - **강조가 필요한 용어**는 `**굵게**`. 이탤릭(`*기울임*`)은 Claude 액센트(`accent-dim`) 색으로 강조되므로 본문 전체에 남발하지 않는다.
 - **코드 펜스에는 언어를 명시**한다 (예: ` ```json `, ` ```bash `). 언어가 없으면 인라인 코드 스타일로 폴백된다.
 - **테이블**은 GFM 문법 사용. 헤더 셀은 자동으로 `bg-tint`가 적용된다.
 - HTML 태그를 섞어 쓸 수 있지만, 가독성을 위해 가능한 한 마크다운 문법으로만 작성한다.
+- **YouTube 영상 임베드 마커**는 영상이 실제로 등장하는 본문 위치에 `<!-- youtube: VIDEO_ID -->` 한 줄로 둔다. `MarkdownContent`가 마커 자리에서 본문을 분할해 그 자리에 16:9 iframe(`https://www.youtube.com/embed/{VIDEO_ID}`)을 렌더하고, 마커 앞·뒤 마크다운은 별도 블록으로 그대로 렌더된다. 영상 URL을 모를 때는 `fetch_lesson_videos.py [lesson_index]`로 해당 Skilljar 레슨 페이지의 iframe src를 뽑아 ID만 떼어 쓴다.
+- **본문 이미지**는 표준 마크다운 `![alt](url)` 문법으로 영상과 동일하게 *원본 레슨에서의 위치*에 그대로 둔다. 외곽 카드·테두리·둥근 모서리 같은 장식은 입히지 않는다 — `markdownComponents.tsx`의 `img` 매핑이 `block max-w-full h-auto`만 적용해 일반 웹페이지처럼 자연스럽게 본문 흐름에 녹는다. 이미지 URL은 Skilljar 원문에서 가져온 외부 CDN 주소를 그대로 사용해도 무방하며, `fetch_lesson_videos.py`가 본문 영역 한정으로 `<img>` src를 함께 출력해 준다.
 
 ## 퀴즈 데이터 작성 규칙
 

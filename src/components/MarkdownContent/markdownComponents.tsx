@@ -150,7 +150,7 @@ const markdownComponents: Components = {
         src={typeof src === 'string' ? src : ''}
         alt={alt ?? ''}
         loading="lazy"
-        className="my-5 rounded-card border border-stroke max-w-full"
+        className="my-5 block max-w-full h-auto"
       />
     )
   },

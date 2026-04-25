@@ -13,9 +13,9 @@ type Props = {
 const READING_TIME_RE = /^>\s*\*\*예상 소요 시간\s*([^*]+?)\*\*\s*\n+/
 
 export default function ContentPage({ quiz, source, prevItem, nextItem }: Props) {
-  const match = source.match(READING_TIME_RE)
-  const readingTime = match?.[1]?.trim() ?? null
-  const body = match ? source.slice(match[0].length) : source
+  const readingMatch = source.match(READING_TIME_RE)
+  const readingTime = readingMatch?.[1]?.trim() ?? null
+  const body = readingMatch ? source.slice(readingMatch[0].length) : source
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-7 sm:pt-10 md:pt-12 pb-20">
