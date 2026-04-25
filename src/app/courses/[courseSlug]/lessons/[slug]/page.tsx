@@ -14,7 +14,7 @@ export function generateStaticParams() {
     const course = getCourse(courseSlug)
     if (!course) return []
     return getContentSlugs(courseSlug)
-      .filter((slug) => course.quizBySlug[slug])
+      .filter((slug) => course.lessonBySlug[slug])
       .map((slug) => ({ courseSlug, slug }))
   })
 }
@@ -25,16 +25,16 @@ export default async function LessonContentPage(
   const { courseSlug, slug } = await props.params
   const course = getCourse(courseSlug)
   if (!course) notFound()
-  const quiz = course.quizBySlug[slug]
+  const lesson = course.lessonBySlug[slug]
   const source = getContent(courseSlug, slug)
-  if (!quiz || !source) notFound()
+  if (!lesson || !source) notFound()
   const href = lessonContentPath(courseSlug, slug)
   const prevItem = getPrevSidebarItem(courseSlug, href)
   const nextItem = getNextSidebarItem(courseSlug, href)
   return (
     <ContentPage
       courseTitle={course.title}
-      quiz={quiz}
+      lesson={lesson}
       source={source}
       prevItem={prevItem}
       nextItem={nextItem}

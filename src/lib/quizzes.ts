@@ -14,19 +14,23 @@ export type QuizQuestion = {
   explanation: string
 }
 
-export type QuizModule = {
+export type LessonModule = {
   lesson: string
   title: string
   slug?: string
-  questions: QuizQuestion[]
+  questions?: QuizQuestion[]
 }
 
-export type Quiz = QuizModule & { slug: string }
+export type QuizModule = LessonModule
 
-export type Section = {
+export type Lesson = {
+  lesson: string
   title: string
-  quizzes: Quiz[]
+  slug: string
+  questions?: QuizQuestion[]
 }
+
+export type Quiz = Lesson & { questions: QuizQuestion[] }
 
 export type SidebarItemKind = 'content' | 'quiz'
 export type SidebarItem = {
@@ -52,8 +56,10 @@ export type CourseBundle = {
   title: string
   shortTitle: string
   sidebarSections: SidebarSection[]
+  lessonBySlug: Record<string, Lesson>
   quizBySlug: Record<string, Quiz>
   firstSlug: string
+  firstHref: string
   hasLessons: boolean
 }
 
@@ -73,14 +79,18 @@ type RawCourse = {
   shortTitle: string
   data: {
     sections: Array<{ title: string; lessons: string[] }>
-    quizModules: QuizModule[]
+    quizModules: LessonModule[]
   }
 }
 
 const rawCourses = COURSES as unknown as RawCourse[]
 
+function hasQuestions(lesson: Lesson): lesson is Quiz {
+  return Array.isArray(lesson.questions) && lesson.questions.length > 0
+}
+
 function buildCourse(raw: RawCourse): CourseBundle {
-  const quizzes: Quiz[] = raw.data.quizModules
+  const lessons: Lesson[] = raw.data.quizModules
     .map((m) => ({ ...m, slug: m.slug ?? slugify(m.title) }))
     .sort((a, b) => {
       const na = Number(a.lesson)
@@ -91,56 +101,70 @@ function buildCourse(raw: RawCourse): CourseBundle {
       return na - nb
     })
 
-  const quizByLesson: Record<string, Quiz> = Object.fromEntries(
-    quizzes.map((q) => [q.lesson, q]),
+  const lessonByLesson: Record<string, Lesson> = Object.fromEntries(
+    lessons.map((l) => [l.lesson, l]),
+  )
+  const lessonBySlug: Record<string, Lesson> = Object.fromEntries(
+    lessons.map((l) => [l.slug, l]),
   )
   const quizBySlug: Record<string, Quiz> = Object.fromEntries(
-    quizzes.map((q) => [q.slug, q]),
+    lessons.filter(hasQuestions).map((q) => [q.slug, q]),
   )
 
-  const grouped: Section[] = raw.data.sections
+  const grouped = raw.data.sections
     .map((sec) => ({
       title: sec.title,
-      quizzes: sec.lessons.map((l) => quizByLesson[l]).filter(Boolean) as Quiz[],
+      lessons: sec.lessons
+        .map((l) => lessonByLesson[l])
+        .filter((lesson): lesson is Lesson => {
+          if (!lesson) return false
+          return hasContent(raw.slug, lesson.slug) || hasQuestions(lesson)
+        }),
     }))
-    .filter((sec) => sec.quizzes.length > 0)
+    .filter((sec) => sec.lessons.length > 0)
 
   const sidebarSections: SidebarSection[] = grouped.map((sec) => ({
     title: sec.title,
-    items: sec.quizzes.flatMap((q) => {
+    items: sec.lessons.flatMap((lesson) => {
       const items: SidebarItem[] = []
-      if (hasContent(raw.slug, q.slug)) {
+      if (hasContent(raw.slug, lesson.slug)) {
         items.push({
-          lesson: q.lesson,
-          slug: q.slug,
-          title: q.title,
+          lesson: lesson.lesson,
+          slug: lesson.slug,
+          title: lesson.title,
           kind: 'content',
-          href: lessonContentPath(raw.slug, q.slug),
+          href: lessonContentPath(raw.slug, lesson.slug),
           label: '강의 내용',
         })
       }
-      items.push({
-        lesson: q.lesson,
-        slug: q.slug,
-        title: q.title,
-        kind: 'quiz',
-        href: lessonQuizPath(raw.slug, q.slug),
-        label: '복습 퀴즈',
-      })
+      if (hasQuestions(lesson)) {
+        items.push({
+          lesson: lesson.lesson,
+          slug: lesson.slug,
+          title: lesson.title,
+          kind: 'quiz',
+          href: lessonQuizPath(raw.slug, lesson.slug),
+          label: '복습 퀴즈',
+        })
+      }
       return items
     }),
   }))
 
-  const firstSlug = grouped.flatMap((sec) => sec.quizzes)[0]?.slug ?? ''
+  const firstItem = sidebarSections.flatMap((s) => s.items)[0] ?? null
+  const firstSlug = firstItem?.slug ?? ''
+  const firstHref = firstItem?.href ?? ''
 
   return {
     slug: raw.slug,
     title: raw.title,
     shortTitle: raw.shortTitle,
     sidebarSections,
+    lessonBySlug,
     quizBySlug,
     firstSlug,
-    hasLessons: quizzes.length > 0,
+    firstHref,
+    hasLessons: firstItem !== null,
   }
 }
 
@@ -160,9 +184,7 @@ export const courseSummaries: CourseSummary[] = rawCourses.map((c) => {
     slug: c.slug,
     title: c.title,
     shortTitle: c.shortTitle,
-    href: bundle.hasLessons
-      ? lessonQuizPath(c.slug, bundle.firstSlug)
-      : coursePath(c.slug),
+    href: bundle.hasLessons ? bundle.firstHref : coursePath(c.slug),
     hasLessons: bundle.hasLessons,
   }
 })
