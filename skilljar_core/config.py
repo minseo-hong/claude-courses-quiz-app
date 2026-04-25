@@ -15,7 +15,6 @@ REPO_DIR = PACKAGE_DIR.parent
 SCRIPTS_DIR = PACKAGE_DIR / "scripts"
 
 COOKIES_FILE = REPO_DIR / "cookies.json"
-MARKDOWN_DIR = REPO_DIR / "markdown"
 
 # ---------------------------------------------------------------------------
 # Skilljar / Playwright defaults
@@ -28,4 +27,3 @@ USER_AGENT = (
 NAVIGATION_TIMEOUT_MS = 60_000
 DEFAULT_SETTLE_MS = 3_000
 LESSON_SETTLE_MS = 2_000
-MEDIA_SETTLE_MS = 5_000

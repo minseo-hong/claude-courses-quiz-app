@@ -1,9 +1,14 @@
 () => {
+    const LESSON_URL_RE = /skilljar\.com\/[a-z0-9-]+\/\d+$/;
+    const root =
+        document.querySelector('.lessons-wrapper') ||
+        document.querySelector('[id^="curriculum-list"]') ||
+        document;
     const seen = new Set();
     const out = [];
-    for (const a of document.querySelectorAll('a')) {
+    for (const a of root.querySelectorAll('a')) {
         const href = a.href || '';
-        if (/skilljar\.com\/claude-101\/\d+$/.test(href) && !seen.has(href)) {
+        if (LESSON_URL_RE.test(href) && !seen.has(href)) {
             seen.add(href);
             out.push({
                 title: a.textContent.trim().replace(/\s+/g, ' '),

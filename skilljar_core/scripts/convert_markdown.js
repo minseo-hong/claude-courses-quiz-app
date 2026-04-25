@@ -1,9 +1,27 @@
 () => {
     const BLOCK = new Set(['P','DIV','SECTION','ARTICLE','BLOCKQUOTE','LI','DT','DD','TR','THEAD','TBODY']);
+    // IFRAME and IMG are handled inline below — do NOT skip them.
     const SKIP  = new Set([
         'SCRIPT','STYLE','NOSCRIPT','NAV','HEADER','FOOTER',
-        'BUTTON','FORM','ASIDE','IFRAME',
+        'BUTTON','FORM','ASIDE',
     ]);
+
+    // Decorative chrome that shouldn't appear in the lesson body.
+    const IMG_SKIP_RE = /(cc\.sj-cdn\.net\/instructor\/.*(header-logo|footer-logo))|(gravatar\.com\/avatar)/i;
+
+    function youtubeId(src) {
+        if (!src) return null;
+        // https://www.youtube.com/embed/VIDEO_ID(?...)?
+        let m = src.match(/youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]{6,})/);
+        if (m) return m[1];
+        // https://youtu.be/VIDEO_ID
+        m = src.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+        if (m) return m[1];
+        // https://www.youtube.com/watch?v=VIDEO_ID
+        m = src.match(/youtube\.com\/watch\?[^\s"']*[?&]v=([A-Za-z0-9_-]{6,})/);
+        if (m) return m[1];
+        return null;
+    }
 
     function toMd(node, ctx) {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -48,6 +66,21 @@
             return '[' + text + '](' + href + ')';
         }
 
+        if (tag === 'IMG') {
+            const src = node.currentSrc || node.src || '';
+            if (!src || IMG_SKIP_RE.test(src)) return '';
+            const alt = (node.alt || '').replace(/[\[\]]/g, '').trim();
+            return '\n![' + alt + '](' + src + ')\n';
+        }
+
+        if (tag === 'IFRAME') {
+            const id = youtubeId(node.src || '');
+            if (id) return '\n<!-- youtube: ' + id + ' -->\n';
+            // Non-YouTube iframes: surface the src as a plain link so it isn't lost.
+            const src = node.src || '';
+            return src ? '\n[embed](' + src + ')\n' : '';
+        }
+
         if (tag === 'UL') {
             return '\n' + Array.from(node.children)
                 .map(li => '- ' + toMd(li, ctx).trim())
@@ -82,7 +115,14 @@
         return inner();
     }
 
-    const SELECTORS = ['.lesson-content','.sj-lesson-content','main','article'];
+    // Lesson body root. `#lesson-main-content` is the Skilljar standard
+    // wrapper that holds every `sjwc-lesson-content-item` block — including
+    // the separate Video item that sits ABOVE the text body on Claude Code
+    // 101. Older selectors are kept as fallbacks.
+    const SELECTORS = [
+        '#lesson-main-content','#lesson-main',
+        '.lesson-content','.sj-lesson-content','main','article',
+    ];
     let root = null;
     for (const sel of SELECTORS) {
         root = document.querySelector(sel);

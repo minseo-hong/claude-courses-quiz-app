@@ -11,7 +11,7 @@ from .commands import ALL_COMMANDS
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="skilljar",
-        description="Skilljar Claude 101 helper CLI",
+        description="Skilljar Claude Academy helper CLI (course-agnostic)",
     )
     subparsers = parser.add_subparsers(dest="cmd", required=True)
     for command in ALL_COMMANDS:

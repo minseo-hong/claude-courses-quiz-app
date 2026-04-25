@@ -37,9 +37,6 @@ class LessonExtractor:
     # ------------------------------------------------------------------
     # Extractions — one method per JS script in scripts/
 
-    async def extract_text(self) -> str:
-        return await self._evaluate("extract_text")
-
     async def extract_markdown(self) -> str:
         return await self._evaluate("convert_markdown")
 
@@ -48,9 +45,6 @@ class LessonExtractor:
 
     async def extract_sidebar_structure(self) -> list[dict[str, Any]]:
         return await self._evaluate("extract_sidebar")
-
-    async def extract_media(self) -> dict[str, Any]:
-        return await self._evaluate("extract_media")
 
     # ------------------------------------------------------------------
 

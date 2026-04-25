@@ -10,17 +10,11 @@ from __future__ import annotations
 
 from .base import Command
 from .markdown import MarkdownCommand
-from .markdown_all import MarkdownAllCommand
-from .media import MediaCommand
 from .sidebar import SidebarCommand
-from .text import TextCommand
 
 ALL_COMMANDS: list[Command] = [
-    TextCommand(),
     MarkdownCommand(),
-    MarkdownAllCommand(),
     SidebarCommand(),
-    MediaCommand(),
 ]
 
 __all__ = ["ALL_COMMANDS", "Command"]

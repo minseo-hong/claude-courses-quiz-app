@@ -1,4 +1,5 @@
 () => {
+    const LESSON_URL_RE = /skilljar\.com\/[a-z0-9-]+\/\d+$/;
     const sections = [];
     let current = null;
 
@@ -20,7 +21,7 @@
         if (node.tagName === 'A') {
             const href = node.href || '';
             const text = node.textContent.trim().replace(/\s+/g, ' ');
-            if (href.match(/skilljar\.com\/claude-101\/\d+$/) && text && current) {
+            if (LESSON_URL_RE.test(href) && text && current) {
                 if (!current.lessons.find(l => l.href === href)) {
                     current.lessons.push({ title: text, href });
                 }
@@ -31,6 +32,12 @@
         for (const child of node.childNodes) walk(child);
     }
 
-    walk(document.body);
+    // Scope to the sidebar/curriculum container so unrelated body H3s
+    // (e.g. "Video", "What is Claude Code?") aren't mistaken for sections.
+    const root =
+        document.querySelector('.lessons-wrapper') ||
+        document.querySelector('[id^="curriculum-list"]') ||
+        document.body;
+    walk(root);
     return sections;
 }
