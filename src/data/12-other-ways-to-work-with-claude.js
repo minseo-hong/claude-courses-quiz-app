@@ -92,13 +92,13 @@ export default {
       category: 'Chrome 동작 위치',
       question: 'Claude for Chrome에 대한 설명으로 옳은 것은?',
       options: [
-        '① 별도 웹 앱으로 제공되며 Chrome 자체와는 직접 통합되지 않는다',
-        '② Chrome 브라우저의 사이드바에 추가되는 브라우저 확장(extension)이다',
-        '③ 백그라운드 데몬으로 동작하며 사용자 UI는 노출되지 않는다',
-        '④ macOS 메뉴바 앱 형태로 Chrome 외부에서만 실행된다',
+        '① 별도 웹 앱(web app) 형태로 제공되며 Chrome 자체와는 직접 통합되지 않는다',
+        '② Chrome 브라우저의 사이드바에 추가되는 브라우저 확장 프로그램이다',
+        '③ 백그라운드 데몬(daemon)으로 동작하며 사용자 UI는 노출되지 않는다',
+        '④ macOS 메뉴바 앱 형태로 Chrome 외부에서만 독립 실행된다',
       ],
       answers: ['②'],
-      explanation: 'Claude for Chrome은 <em>Google Chrome의 사이드바</em>로 Claude를 추가해 주는 <em>브라우저 확장</em>이다. 사용자가 작업 중인 페이지를 관찰하고 브라우저 안에서 직접 행동을 수행할 수 있다.',
+      explanation: 'Claude for Chrome은 <em>Google Chrome의 사이드바</em>로 Claude를 추가해 주는 <em>브라우저 확장(browser extension)</em>이다. 사용자가 작업 중인 페이지를 관찰하고 브라우저 안에서 직접 행동을 수행할 수 있다.',
     },
     {
       id: 8,
